@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sapporo Complete Guide 2027</title>
+    
+    <!-- Google Fonts: Noto Sans Thai -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS for OpenStreetMap Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e3a8a;
+            --accent: #2563eb;
+            --accent-warm: #d97706;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --red-airasia: #e11d48;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0 0 40px 0;
+            line-height: 1.6;
+        }
+
+        /* Top Navigation Header */
+        .top-bar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .top-bar .title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+        .top-nav {
+            display: flex;
+            gap: 8px;
+        }
+        .nav-link {
+            background: #f1f5f9;
+            color: var(--primary);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Noto Sans Thai', sans-serif;
+        }
+        .nav-link:active {
+            background: #e2e8f0;
+        }
+
+        .container {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 24px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Minimal Food & Dessert Card */
+        .minimal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .card-hero {
+            position: relative;
+            height: 140px;
+            width: 100%;
+            background: #cbd5e1;
+        }
+        .card-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-content {
+            padding: 12px;
+        }
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .restaurant-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+        .restaurant-jp {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .tag-badge {
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+        
+        .map-btn-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        /* Thumbnails Container */
+        .thumb-section {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border);
+        }
+        .thumb-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .thumb-grid {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .thumb-item {
+            flex: 0 0 105px;
+            text-align: center;
+        }
+        .thumb-item img {
+            width: 105px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            display: block;
+        }
+        .thumb-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Timeline Schedule Styling */
+        .timeline {
+            position: relative;
+            padding-left: 16px;
+            border-left: 2px solid #cbd5e1;
+            margin-left: 6px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -21px;
+            top: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            border: 2px solid white;
+        }
+        .day-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: var(--accent);
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .place-block {
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .place-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .place-header {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .jp-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+        .map-link {
+            display: inline-flex;
+            align-items: center;
+            color: #2563eb;
+            font-weight: 700;
+            text-decoration: none;
+            background: #eff6ff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border: 1px solid #bfdbfe;
+        }
+        .dist-badge {
+            font-size: 0.72rem;
+            color: #0369a1;
+            background: #e0f2fe;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .transport-info {
+            font-size: 0.8rem;
+            color: #92400e;
+            background: #fef3c7;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        /* Modal Popups */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15,23,42,0.65);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 18px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: #f1f5f9;
+            border: none;
+            font-size: 1.1rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+        .jp-address-box {
+            background: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin: 8px 0;
+            border-left: 4px solid var(--accent);
+            user-select: all;
+        }
+        .flight-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fafafa;
+            font-size: 0.82rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Header with Fixed Modals -->
+    <div class="top-bar">
+        <div class="title">❄️ Sapporo 2027</div>
+        <div class="top-nav">
+            <button class="nav-link" onclick="openHotelModal()">🏨 รายละเอียดที่พัก</button>
+            <button class="nav-link" onclick="openFlightModal()">✈️ รายละเอียดเที่ยวบิน</button>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- 1. Interactive Map -->
+        <div class="section-title">🗺️ แผนที่พิกัดทั้งหมด (Interactive Map)</div>
+        <div id="map" style="height: 280px; width: 100%; border-radius: 12px; border: 1px solid var(--border);"></div>
+
+        <!-- 2. Trip Detail Schedule -->
+        <div class="section-title">🗓️ แผนเที่ยวประจำวัน (3-9 กุมภาพันธ์ 2027)</div>
+        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 14px;">
+            <div class="timeline">
+                
+                <!-- Day 1 -->
+                <div class="timeline-item">
+                    <span class="day-title">DAY 1 — พุธ 3 ก.พ. 2027</span>
+                    
+                    <div class="place-block">
+                        <div class="place-header">✈️ 10:40 ถึงสนามบิน New Chitose Airport <span class="jp-name">(新千歳空港)</span> <a href="https://maps.google.com/?q=New+Chitose+Airport" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~45 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: นั่งรถไฟ JR Rapid Airport ตรงเข้าเมือง ใช้เวลาประมาณ 37 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🏨 15:00 เช็คอิน Hotel Livemax Sapporo Susukino <span class="jp-name">(ホテルリブマックス札幌すすきの)</span> <a href="https://maps.google.com/?q=Hotel+Livemax+Sapporo+Susukino" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0 กม. (จุดศูนย์กลางที่พัก)</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินจากสถานีรถไฟใต้ดิน Hosui-Susukino หรือ Susukino ประมาณ 5-7 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🌃 เดินเล่นย่าน Susukino <span class="jp-name">(すすきの)</span> <a href="https://maps.google.com/?q=Susukino" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.5 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าจากโรงแรมเพียง 6 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🍜 ทานมิโซะราเมงที่ Ganso Ramen Yokocho <span class="jp-name">(元祖ラーメン横丁)</span> <a href="https://maps.google.com/?q=Ganso+Ramen+Yokocho+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.4 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าจากย่าน Susukino เพียง 5 นาที</div>
+                    </div>
+                </div>
+
+                <!-- Day 2 -->
+                <div class="timeline-item">
+                    <span class="day-title">DAY 2 — พฤหัส 4 ก.พ. 2027</span>
+                    
+                    <div class="place-block">
+                        <div class="place-header">🐻 สวนสัตว์หิมะ Maruyama Zoo <span class="jp-name">(札幌市円山動物園)</span> <a href="https://maps.google.com/?q=Maruyama+Zoo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~5 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: นั่งรถไฟใต้ดิน Tozai Line ลงสถานี Maruyama Koen แล้วเดินต่อ หรือนั่งแท็กซี่ประมาณ 15 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">❄️ ชมงานหิมะวันแรกที่ Odori Park <span class="jp-name">(大通公園)</span> <a href="https://maps.google.com/?q=Odori+Park" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~1 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินทางใต้ดิน Polar Town หรือนั่งรถไฟใต้ดิน Namboku Line เพียง 1 สถานี</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🗼 ขึ้นชมวิวเมืองที่ Sapporo TV Tower <span class="jp-name">(さっぽろテレビ塔)</span> <a href="https://maps.google.com/?q=Sapporo+TV+Tower" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~1.2 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าต่อจากสวน Odori Park อยู่ปลายฝั่งตะวันออกของสวน</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🍣 ทานข้าวหน้าไข่ปลาแซลมอนล้นชาม Umi Hachikyo <span class="jp-name">(海味 はちきょう)</span> <a href="https://maps.google.com/?q=Umi+Hachikyo+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.5 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าจากหอคอยกลับมาย่าน Susukino ใช้เวลาเดินประมาณ 6 นาที</div>
+                    </div>
+                </div>
+
+                <!-- Day 3 -->
+                <div class="timeline-item">
+                    <span class="day-title">DAY 3 — ศุกร์ 5 ก.พ. 2027</span>
+                    
+                    <div class="place-block">
+                        <div class="place-header">🗿 ชมเนินพระพุทธรูปกลางหิมะ Hill of the Buddha <span class="jp-name">(頭大仏)</span> <a href="https://maps.google.com/?q=Hill+of+the+Buddha+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~17 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: นั่งรถไฟใต้ดิน Namboku Line ลงสุดสายที่สถานี Makomanai แล้วต่อรถบัส Chuo Bus สาย 106 หรือนั่งแท็กซี่ประมาณ 30 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🦀 ทานข้าวหน้าซีฟู้ด/ขาปูย่างที่ Nijo Market <span class="jp-name">(二条市場)</span> <a href="https://maps.google.com/?q=Nijo+Market+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~1 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: นั่งรถไฟใต้ดินกลับเข้าเมืองมาลงสถานี Odori แล้วเดินต่อ 12 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🦐 ซดราเมงซุปมันกุ้งเข้มข้น Ebisoba Ichigen <span class="jp-name">(えびそば一幻 総本店)</span> <a href="https://maps.google.com/?q=Ebisoba+Ichigen+Sohonten" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.6 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าจากโรงแรมที่พักเพียง 7 นาที</div>
+                    </div>
+                </div>
+
+                <!-- Day 4 -->
+                <div class="timeline-item">
+                    <span class="day-title">DAY 4 — เสาร์ 6 ก.พ. 2027</span>
+                    
+                    <div class="place-block">
+                        <div class="place-header">🚗 ออกเดินทาง Road Trip ไป Biei <span class="jp-name">(美瑛町)</span> <a href="https://maps.google.com/?q=Sapporo+to+Shirahige+Waterfall+Biei" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~150 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: ขับรถเช่าระบบ 4WD พร้อมล้อ Snow Tires ออกทางด่วน หรือซื้อดีล Day Tour รถบัสท่องเที่ยว</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">❄️ ชมน้ำตกหิมะ Shirahige Waterfall <span class="jp-name">(しらひげの滝)</span> <a href="https://maps.google.com/?q=Shirahige+Waterfall+Biei" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~165 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: ขับรถยนต์ไปตามเส้นทางไป Shirogane Onsen มีลานจอดรถให้บริการ</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">💙 ชมสระน้ำสีฟ้า Blue Pond Biei <span class="jp-name">(白金青い池)</span> <a href="https://maps.google.com/?q=Blue+Pond+Biei" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~160 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: อยู่ห่างจากน้ำตก Shirahige เพียง 5 นาทีด้วยการขับรถ</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🦀 ทานคอร์สมื้อปูเต็มอิ่ม Kani Honke <span class="jp-name">(札幌かに本家 すすきの店)</span> <a href="https://maps.google.com/?q=Kani+Honke+Sapporo+Susukino" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.5 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินทางกลับถึงซัปโปโร และเดินเท้าจากโรงแรมเพียง 6 นาที</div>
+                    </div>
+                </div>
+
+                <!-- Day 5 -->
+                <div class="timeline-item">
+                    <span class="day-title">DAY 5 — อาทิตย์ 7 ก.พ. 2027</span>
+                    
+                    <div class="place-block">
+                        <div class="place-header">☃️ เล่นสไลเดอร์หิมะที่ Takino Snow World <span class="jp-name">(滝野スノーワールド)</span> <a href="https://maps.google.com/?q=Takino+Snow+World" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~18 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: นั่งรถไฟใต้ดิน Namboku Line ลงสถานี Makomanai แล้วต่อรถบัส Chuo สาย 106 ลงที่สวน</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🌃 ชมวิวเมือง 360 องศา Mount Moiwa <span class="jp-name">(藻岩山)</span> <a href="https://maps.google.com/?q=Mount+Moiwa+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~4.5 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: นั่งรถราง Tram จาก Susukino ลงสถานี Ropeway Iriguchi แล้วต่อ Shuttle Bus ฟรีไปขึ้นกระเช้า</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🍣 ทานซูชิสายพานพรีเมียม Nemuro Hanamaru <span class="jp-name">(根室花まる)</span> <a href="https://maps.google.com/?q=Nemuro+Hanamaru+JR+Tower+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~2 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: นั่งรถไฟใต้ดิน Namboku Line มาลงสถานี JR Sapporo ร้านตั้งอยู่ในตึก JR Tower Stellar Place ชั้น 6</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🍨 ทานพาร์เฟต์ดึก Parfaiteria MiL <span class="jp-name">(夜パフェ専門店 パフェテリア ミル)</span> <a href="https://maps.google.com/?q=Parfaiteria+MiL+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.5 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าจากย่าน Susukino เพียง 6 นาที</div>
+                    </div>
+                </div>
+
+                <!-- Day 6 -->
+                <div class="timeline-item">
+                    <span class="day-title">DAY 6 — จันทร์ 8 ก.พ. 2027</span>
+                    
+                    <div class="place-block">
+                        <div class="place-header">🛍️ เดินช้อปปิ้งของฝากถนนคนเดิน Tanukikoji <span class="jp-name">(狸小路商店街)</span> <a href="https://maps.google.com/?q=Tanukikoji+Shopping+Street" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.6 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าจากโรงแรมเพียง 7 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🥛 ชิมซอฟต์เสิร์ฟไอศกรีมคู่เหล้าหวาน Milk Mura <span class="jp-name">(ミルク村)</span> <a href="https://maps.google.com/?q=Milk+Mura+Sapporo" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.5 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้าจากถนนคนเดิน Tanukikoji เพียง 5 นาที</div>
+                    </div>
+
+                    <div class="place-block">
+                        <div class="place-header">🥩 มื้ออำลาด้วยเนื้อเจงกิสข่านย่าน Susukino <span class="jp-name">(すすきの ジンギスカン)</span> <a href="https://maps.google.com/?q=Susukino+Jingisukan" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~0.4 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เดินเท้ากลับมาที่ย่าน Susukino เพียง 5 นาที</div>
+                    </div>
+                </div>
+
+                <!-- Day 7 -->
+                <div class="timeline-item">
+                    <span class="day-title">DAY 7 — อังคาร 9 ก.พ. 2027</span>
+                    
+                    <div class="place-block">
+                        <div class="place-header">✈️ 08:30 เดินทางถึงสนามบิน New Chitose Airport <span class="jp-name">(新千歳空港)</span> <a href="https://maps.google.com/?q=New+Chitose+Airport" target="_blank" class="map-link">📍 Google Maps</a> <span class="dist-badge">~45 กม.</span></div>
+                        <div class="transport-info">คำแนะนำการเดินทาง: เช็คเอาต์ 07:30 นั่งรถไฟ JR Rapid Airport จากสถานี Sapporo หรือแท็กซี่ตรงไปสนามบิน (~45 นาที)</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. ร้านอาหารคาว (Minimal Cards) -->
+        <div class="section-title">🍱 ร้านอาหารคาว</div>
+
+        <!-- Umi Hachikyo -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80" alt="Umi Hachikyo">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Umi Hachikyo</div>
+                        <div class="restaurant-jp">海味 はちきょう すすきの本店</div>
+                    </div>
+                    <span class="tag-badge">🧡 Ikura Don</span>
+                </div>
+                <a href="https://maps.google.com/?q=Umi+Hachikyo+Sapporo" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=300&q=80" alt="Tsukko Don">
+                            <div class="thumb-name">Tsukko Don</div>
+                        </div>
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=300&q=80" alt="Hokke Fish">
+                            <div class="thumb-name">ปลาฮอกเกะย่าง</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nijo Market -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=800&q=80" alt="Nijo Market">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Nijo Market</div>
+                        <div class="restaurant-jp">二条市場 (Nijo Fish Market)</div>
+                    </div>
+                    <span class="tag-badge">🍣 Otoro / 🦀 ปู</span>
+                </div>
+                <a href="https://maps.google.com/?q=Nijo+Market+Sapporo" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=300&q=80" alt="Otoro Don">
+                            <div class="thumb-name">Otoro Don</div>
+                        </div>
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=300&q=80" alt="Grilled Crab Legs">
+                            <div class="thumb-name">ขาปูย่างสด</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kani Honke -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=800&q=80" alt="Kani Honke">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Kani Honke</div>
+                        <div class="restaurant-jp">札幌かに本家 すすきの店</div>
+                    </div>
+                    <span class="tag-badge">🦀 คอร์สมื้อปู</span>
+                </div>
+                <a href="https://maps.google.com/?q=Kani+Honke+Sapporo+Susukino" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=300&q=80" alt="Crab Sukiyaki">
+                            <div class="thumb-name">สุกี้ปูทาราบะ</div>
+                        </div>
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=300&q=80" alt="Crab Sashimi">
+                            <div class="thumb-name">ซาชิมิปูสด</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nemuro Hanamaru -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=800&q=80" alt="Nemuro Hanamaru">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Nemuro Hanamaru</div>
+                        <div class="restaurant-jp">根室花まる JRタワーステラプレイス店</div>
+                    </div>
+                    <span class="tag-badge">🍣 ซูชิสายพาน</span>
+                </div>
+                <a href="https://maps.google.com/?q=Nemuro+Hanamaru+JR+Tower+Sapporo" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=300&q=80" alt="Fresh Sushi">
+                            <div class="thumb-name">ซูชิหน้าแน่นสด</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ebisoba Ichigen -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80" alt="Ebisoba Ichigen">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Ebisoba Ichigen</div>
+                        <div class="restaurant-jp">えびそば一幻 総本店</div>
+                    </div>
+                    <span class="tag-badge">🦐 ราเมงซุปมันกุ้ง</span>
+                </div>
+                <a href="https://maps.google.com/?q=Ebisoba+Ichigen+Sohonten" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1591814468924-caf88d1232e1?auto=format&fit=crop&w=300&q=80" alt="Ebi Miso Ramen">
+                            <div class="thumb-name">Ebi Miso Ramen</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ร้านอาหารหวาน (Minimal Cards) -->
+        <div class="section-title">🍨 ร้านอาหารหวาน & ขนม</div>
+
+        <!-- Milk Mura -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80" alt="Milk Mura">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Milk Mura</div>
+                        <div class="restaurant-jp">ミルク村 SAPPORO本店</div>
+                    </div>
+                    <span class="tag-badge">🍦 Soft Serve + Liqueur</span>
+                </div>
+                <a href="https://maps.google.com/?q=Milk+Mura+Sapporo" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=300&q=80" alt="Soft Serve Set">
+                            <div class="thumb-name">Liqueur Set</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parfaiteria MiL -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80" alt="Parfaiteria MiL">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Parfaiteria MiL</div>
+                        <div class="restaurant-jp">夜パフェ専門店 パフェテリア ミル</div>
+                    </div>
+                    <span class="tag-badge">🌙 Night Parfait</span>
+                </div>
+                <a href="https://maps.google.com/?q=Parfaiteria+MiL+Sapporo" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80" alt="Seasonal Parfait">
+                            <div class="thumb-name">Seasonal Parfait</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kinotoya Bake -->
+        <div class="minimal-card">
+            <div class="card-hero">
+                <img src="https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80" alt="Kinotoya Bake">
+            </div>
+            <div class="card-content">
+                <div class="card-header-row">
+                    <div>
+                        <div class="restaurant-name">Kinotoya Bake</div>
+                        <div class="restaurant-jp">キノトヤ ベイク (Pole Town)</div>
+                    </div>
+                    <span class="tag-badge">🧀 Cheese Tart</span>
+                </div>
+                <a href="https://maps.google.com/?q=Kinotoya+Bake+Pole+Town+Sapporo" target="_blank" class="map-btn-inline">📍 Google Maps</a>
+                
+                <div class="thumb-section">
+                    <div class="thumb-label">เมนูเด็ดแนะนำ:</div>
+                    <div class="thumb-grid">
+                        <div class="thumb-item">
+                            <img src="https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=300&q=80" alt="Cheese Tart">
+                            <div class="thumb-name">Cheese Tart อบสด</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal 1: Details Hotel Popup -->
+    <div id="hotelModal" class="modal-overlay" onclick="closeModalOnOutside(event, 'hotelModal')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('hotelModal')">&times;</button>
+            <h3 style="margin-top:0; color:var(--primary); font-size:1.15rem;">🏨 รายละเอียดที่พัก (Hotel Details)</h3>
+            
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80" style="width:100%; height:150px; object-fit:cover; border-radius:10px; margin:6px 0;" alt="Hotel Livemax">
+            
+            <strong style="font-size:1.05rem; color:var(--accent); display:block;">Hotel Livemax Sapporo Susukino</strong>
+            <div style="font-size:0.85rem; color:var(--text-muted); font-weight:bold;">ホテルリブマックス 札幌すすきの</div>
+            
+            <div class="jp-address-box">
+                4-1 nishi-6chome, minami-7jou, ซัปโปโร, ญี่ปุ่น, 064-0807<br>
+                (南七条西6丁目4-1, 札幌, 日本, 064-0807)
+            </div>
+
+            <!-- รายละเอียดการจอง -->
+            <div style="background:#f1f5f9; padding:10px 12px; border-radius:8px; margin-bottom:10px; font-size:0.82rem;">
+                <div style="font-weight:bold; color:var(--primary); margin-bottom:6px; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">📌 รายละเอียดการจอง</div>
+                <div style="color:#e11d48; font-weight:bold; margin-bottom:2px;">🔖 เลขที่ใบจอง: 2045501999</div>
+                <div><strong>จำนวนห้องและจำนวนคืน:</strong> 1 ห้อง, 6 คืน</div>
+                <div><strong>ประเภทห้องพัก:</strong> Standard Twin Non-Smoking</div>
+                <div><strong>โปรโมชั่น:</strong> ข้อเสนอเวลาจำกัด ราคาลดแล้ว 5% !</div>
+                <div><strong>ชื่อผู้เข้าพัก:</strong> phimonphan khangkhan</div>
+                <div><strong>จำนวนผู้เข้าพัก:</strong> ผู้ใหญ่ 3 คน</div>
+                <div><strong>สิทธิประโยชน์ที่ได้รับ:</strong> ฟรี WiFi</div>
+                <div style="margin-top:4px; color:#475569;"><strong>คำขอรับบริการเพิ่มเติม:</strong> I'd like a non-smoking room, I'd like to stay on a high floor, ใกล้ลิฟต์ <small style="color:#94a3b8;">(*ขึ้นกับความพร้อมของที่พักในการให้บริการ)</small></div>
+            </div>
+
+            <!-- รายละเอียดการชำระเงิน -->
+            <div style="background:#fefce8; border:1px solid #fef08a; padding:10px 12px; border-radius:8px; margin-bottom:10px; font-size:0.82rem;">
+                <div style="font-weight:bold; color:#854d0e; margin-bottom:6px; border-bottom:1px solid #fef08a; padding-bottom:4px;">💳 รายละเอียดการชำระเงิน</div>
+                <div style="display:flex; justify-content:space-between;"><span>ห้องพัก 1 ห้อง x 6 คืน</span><span>฿ 44,486.69</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>ภาษีและค่าธรรมเนียม</span><span>฿ 9,342.48</span></div>
+                <div style="display:flex; justify-content:space-between; color:#dc2626;"><span>ส่วนลดพิเศษของ LINE 15.97%</span><span>-฿ 994.46</span></div>
+                <div style="display:flex; justify-content:space-between; font-weight:bold; color:var(--primary); font-size:0.9rem; margin-top:4px; border-top:1px dashed #cbd5e1; padding-top:4px;">
+                    <span>ราคารวมทั้งสิ้น (รวมภาษีและค่าธรรมเนียม)</span>
+                    <span style="color:#16a34a;">฿ 52,834.71</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; color:#16a34a; font-weight:600; margin-top:2px;">
+                    <span>ชำระแล้ววันนี้ (••••6379)</span>
+                    <span>฿ 52,834.71</span>
+                </div>
+            </div>
+
+            <!-- ข้อมูลติดต่อที่พัก -->
+            <div style="font-size:0.8rem; color:var(--text-muted); background:#fafafa; border:1px solid var(--border); padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+                <div style="font-weight:600; color:var(--text); margin-bottom:2px;">📞 หากมีคำถามใดๆ เกี่ยวกับที่พัก กรุณาติดต่อที่พักโดยตรง:</div>
+                <div>📱 โทร: <a href="tel:+81115529200" style="color:var(--accent); font-weight:bold; text-decoration:none;">+81115529200</a></div>
+                <div>✉️ อีเมล: <a href="mailto:h-sapporosusukino@livemax.jp" style="color:var(--accent); text-decoration:none;">h-sapporosusukino@livemax.jp</a></div>
+            </div>
+
+            <a href="https://maps.google.com/?q=Hotel+Livemax+Sapporo+Susukino" target="_blank" class="map-btn-inline" style="width:100%; justify-content:center; padding:10px; font-size:0.88rem;">📍 เปิด Google Maps นำทางไปโรงแรม</a>
+        </div>
+    </div>
+
+    <!-- Modal 2: Flight Tickets Popup -->
+    <div id="flightModal" class="modal-overlay" onclick="closeModalOnOutside(event, 'flightModal')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('flightModal')">&times;</button>
+            <h3 style="margin-top:0; color:#e11d48;">✈️ รายละเอียดเที่ยวบิน & ผู้เดินทาง</h3>
+
+            <!-- เบอร์ติดต่อฉุกเฉิน -->
+            <div style="background:#fef2f2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; margin-bottom:12px; font-size:0.82rem;">
+                <div style="font-weight:bold; color:#991b1b; margin-bottom:2px;">🚨 เบอร์ติดต่อฉุกเฉินผู้เดินทาง:</div>
+                <div>👤 Somphop Limrudee: <a href="tel:+66886162454" style="color:#b91c1c; font-weight:bold; text-decoration:none;">+66 88 616 2454</a></div>
+                <div>👤 Phimonphan Khaengkhan: <a href="tel:+66886242626" style="color:#b91c1c; font-weight:bold; text-decoration:none;">+66 88 624 2626</a></div>
+            </div>
+
+            <div style="font-weight:bold; color:var(--primary); margin:8px 0 4px 0;">🛫 ขาไป: DMK ➔ CTS (3 Jan 2027)</div>
+            <div class="flight-card">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #cbd5e1; padding-bottom:4px; margin-bottom:4px;">
+                    <strong>Thai AirAsia X (XJ 620)</strong>
+                    <span style="color:#e11d48; font-weight:bold;">PNR: MFK4MD</span>
+                </div>
+                <div>⏰ 01:50 (DMK) ➔ 10:40 (CTS)</div>
+                <div>👤 Somphop Limrudee, Kham Nuanphong (Carry-on 7 kg/ท่าน)</div>
+            </div>
+            <div class="flight-card">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #cbd5e1; padding-bottom:4px; margin-bottom:4px;">
+                    <strong>Thai AirAsia X (XJ 620)</strong>
+                    <span style="color:#e11d48; font-weight:bold;">PNR: GBBU5M</span>
+                </div>
+                <div>⏰ 01:50 (DMK) ➔ 10:40 (CTS)</div>
+                <div>👤 Phimonphan Khaengkhan (Checked 20 kg + Carry-on 7 kg)</div>
+            </div>
+
+            <div style="font-weight:bold; color:var(--primary); margin:14px 0 4px 0;">🛬 ขากลับ: CTS ➔ DMK (9 Jan 2027)</div>
+            <div class="flight-card">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #cbd5e1; padding-bottom:4px; margin-bottom:4px;">
+                    <strong>Thai AirAsia X (XJ 621)</strong>
+                    <span style="color:#e11d48; font-weight:bold;">PNR: MD3HWZ</span>
+                </div>
+                <div>⏰ 11:55 (CTS) ➔ 18:05 (DMK)</div>
+                <div>👤 Somphop Limrudee, Kham Nuanphong (Carry-on 7 kg/ท่าน)</div>
+            </div>
+            <div class="flight-card">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #cbd5e1; padding-bottom:4px; margin-bottom:4px;">
+                    <strong>Thai AirAsia X (XJ 621)</strong>
+                    <span style="color:#e11d48; font-weight:bold;">PNR: C8DR8F</span>
+                </div>
+                <div>⏰ 11:55 (CTS) ➔ 18:05 (DMK)</div>
+                <div>👤 Phimonphan Khaengkhan (Checked 20 kg + Carry-on 7 kg)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS Map Script -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Leaflet Map Initialization
+        var map = L.map('map').setView([43.0535, 141.3525], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+
+        var locations = [
+            { name: "🏨 Hotel Livemax Susukino (ホテルリブマックス札幌すすきの)", lat: 43.0516, lng: 141.3508 },
+            { name: "🐻 Maruyama Zoo (札幌市円山動物園)", lat: 43.0518, lng: 141.3078 },
+            { name: "🗿 Hill of the Buddha (頭大仏)", lat: 42.9208, lng: 141.3581 },
+            { name: "☃️ Takino Snow World (滝野スノーワールド)", lat: 42.9142, lng: 141.3853 },
+            { name: "🗼 Sapporo TV Tower (さっぽろテレビ塔)", lat: 43.0611, lng: 141.3564 },
+            { name: "🦀 Kani Honke (札幌かに本家)", lat: 43.0545, lng: 141.3535 },
+            { name: "🍣 Nemuro Hanamaru (根室花まる)", lat: 43.0686, lng: 141.3508 },
+            { name: "❄️ Shirahige Waterfall (しらひげの滝)", lat: 43.5739, lng: 142.6418 },
+            { name: "💙 Blue Pond (白金青い池)", lat: 43.5794, lng: 142.6139 },
+            { name: "🍣 Umi Hachikyo (海味 はちきょう)", lat: 43.0544, lng: 141.3533 },
+            { name: "🦀 Nijo Market (二条市場)", lat: 43.0583, lng: 141.3582 },
+            { name: "🦐 Ebisoba Ichigen (えびそば一幻)", lat: 43.0508, lng: 141.3475 }
+        ];
+
+        locations.forEach(function(loc) {
+            L.marker([loc.lat, loc.lng]).addTo(map).bindPopup("<b>" + loc.name + "</b>");
+        });
+
+        // Modal Handlers
+        function openHotelModal() { document.getElementById('hotelModal').style.display = 'flex'; }
+        function openFlightModal() { document.getElementById('flightModal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function closeModalOnOutside(e, id) { if (e.target.id === id) closeModal(id); }
+    </script>
+</body>
+</html>
