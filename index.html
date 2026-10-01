@@ -868,6 +868,15 @@
     <!-- Leaflet JS Map Script -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        (function () {
+          var PASSWORD = "007008009";
+          var userInput = prompt("Enter password to access this page:");
+          if (userInput !== PASSWORD) {
+            document.documentElement.innerHTML = "";
+            return;
+          }
+        })();
+        
         // Leaflet Map Initialization
         var map = L.map('map').setView([43.0535, 141.3525], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
@@ -896,6 +905,8 @@
         function openFlightModal() { document.getElementById('flightModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function closeModalOnOutside(e, id) { if (e.target.id === id) closeModal(id); }
+
+        
     </script>
 </body>
 </html>
